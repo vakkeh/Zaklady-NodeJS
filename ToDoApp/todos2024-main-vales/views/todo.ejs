@@ -24,6 +24,7 @@
   <form method="post" action="/update-todo/<%= todo.id %>">
     <h2>Upravit todočko</h2>
     <input placeholder="Název todočka" name="title" value="<%= todo.title %>">
+    <label for="priority">Priorita: </label>
     <select name="priority">
       <option value="normal" <%= todo.priority === 'normal' ? 'selected' : '' %>>Normal</option>
       <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Low</option>
