@@ -7,21 +7,13 @@ async function main() {
     const instructionsStr = instructions.toString();
     const [sourceFile, destFile] = instructionsStr.trim().split(' ');
 
-    var sourceExists;
-
     try {
       await fs.access(sourceFile);
-      sourceExists = true;
     } catch {
-      sourceExists = false; 
-    }
-
-    if (!sourceExists) {
       console.error('Zdrojový soubor neexistuje!');
       return; 
     }
 
-    await fs.access(sourceFile);
     const fileContent = await fs.readFile(sourceFile);
     const contentStr = fileContent.toString();
     
