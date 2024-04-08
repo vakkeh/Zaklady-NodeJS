@@ -1,9 +1,9 @@
 import express from 'express'
-import knex from 'knex'
-import knexfile from './knexfile.js'
+// Defaultní a jmenné exporty je možné kombinovat 
+import db, { getAllTodos } from './src/db.js'
+import { createWebSocketServer, sendTodosToAllConnections, sendTodoDetailToAllConnections, sendTodoDeletedToAllConnections } from './src/websockets.js'
 
 const app = express()
-const db = knex(knexfile)
 
 app.set('view engine', 'ejs')
 
@@ -32,6 +32,8 @@ app.get('/todo/:id', async (req, res, next) => {
   res.render('todo', {
     todo,
   })
+
+  sendTodoDetailToAllConnections(todo)
 })
 
 app.post('/add-todo', async (req, res) => {
@@ -42,6 +44,8 @@ app.post('/add-todo', async (req, res) => {
   };
 
   await db('todos').insert(todo);
+
+  sendTodosToAllConnections()
 
   res.redirect('/');
 }); 
@@ -54,6 +58,9 @@ app.post('/update-todo/:id', async (req, res, next) => {
 
   await db('todos').update({ title, priority }).where('id', todo.id); // Aktualizujeme i priority
 
+  sendTodoDetailToAllConnections(todo)
+  sendTodosToAllConnections()
+
   res.redirect('back');
 });
 
@@ -64,6 +71,10 @@ app.get('/remove-todo/:id', async (req, res) => {
 
   await db('todos').delete().where('id', todo.id)
 
+  sendTodoDetailToAllConnections(todo)
+  sendTodosToAllConnections()
+  sendTodoDeletedToAllConnections(req.params.id)
+
   res.redirect('/')
 })
 
@@ -73,6 +84,9 @@ app.get('/toggle-todo/:id', async (req, res, next) => {
   if (!todo) return next()
 
   await db('todos').update({ done: !todo.done }).where('id', todo.id)
+
+  sendTodoDetailToAllConnections(todo)
+  sendTodosToAllConnections()
 
   res.redirect('back')
 })
@@ -88,6 +102,12 @@ app.use((err, req, res, next) => {
   res.send('500 - Chyba na straně serveru')
 })
 
-app.listen(3000, () => {
+/*app.listen(3000, () => {
   console.log('Server listening on http://localhost:3000')
+})*/
+
+const server = app.listen(3000, () => {
+  console.log(`Server listening at http://localhost:3000`)
 })
+
+createWebSocketServer(server)

@@ -9,24 +9,9 @@
 
   <h1><%= title %></h1>
 
-  <ul>
-    <% for (const todo of todos) { %>
-      <li>
-        <a href="/todo/<%= todo.id %>">
-          <%= todo.title %>
-        </a>
-        &nbsp; - Priorita: <%= todo.priority %>
-        &nbsp;
-        <a href="/remove-todo/<%= todo.id %>">
-          odebrat
-        </a>
-        &nbsp;
-        <a href="/toggle-todo/<%= todo.id %>">
-          <%= todo.done ? 'hotovo' : 'nehotvo' %>
-        </a>
-      </li>
-    <% } %>
-  </ul>
+  <div id="todos">
+    <%- include('_todos') %>
+  </div>
 
   <form method="post" action="/add-todo">
     <input placeholder="Název todočka" name="title" required>
@@ -39,6 +24,18 @@
     <button type="submit">Přidat</button>
   </form>
 
+  <script>
+    // místo protokolu http použijeme ws
+    // adresa a port (localhost:3000) musí souhlasit s adresou serveru
+    const ws = new WebSocket('ws://localhost:3000')
 
+    ws.addEventListener('message', (message) => {
+      const json = JSON.parse(message.data)
+
+      if (json.type === 'todos') {
+        document.getElementById('todos').innerHTML = json.html
+      }
+    })
+  </script>
 </body>
 </html>

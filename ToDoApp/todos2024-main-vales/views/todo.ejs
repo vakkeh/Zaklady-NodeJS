@@ -36,6 +36,20 @@
   <hr>
 
   <a href="/">Zpět na seznam</a>
-
+  <script>
+    const ws = new WebSocket('ws://localhost:3000')
+  
+    ws.addEventListener('message', (message) => {
+      const json = JSON.parse(message.data)
+  
+      if (json.type === 'todo') {
+        document.querySelector('h1').textContent = json.todo.title
+        // Aktualizujte další části stránky podle potřeby
+      } else if (json.type === 'deleted') {
+        document.querySelector('h1').textContent = 'Todočko bylo smazáno'
+        // Zobrazte hlášku a tlačítko pro návrat na seznam todoček
+      }
+    })
+  </script>
 </body>
 </html>
