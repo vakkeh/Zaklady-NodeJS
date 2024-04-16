@@ -38,18 +38,20 @@
   <a href="/">Zpět na seznam</a>
   <script>
     const ws = new WebSocket('ws://localhost:3000')
-  
+    const todoId = '<%= todo.id %>'
+
+
     ws.addEventListener('message', (message) => {
-      const json = JSON.parse(message.data)
-  
-      if (json.type === 'todo') {
-        document.querySelector('h1').textContent = json.todo.title
-        // Aktualizujte další části stránky podle potřeby
-      } else if (json.type === 'deleted') {
-        document.querySelector('h1').textContent = 'Todočko bylo smazáno'
-        // Zobrazte hlášku a tlačítko pro návrat na seznam todoček
-      }
-    })
+    const json = JSON.parse(message.data)
+
+    if (json.type === 'todo' && json.todo.id === todoId) {
+      document.querySelector('h1').textContent = json.todo.title
+      document.querySelector('select[name="priority"]').value = json.todo.priority
+      document.querySelector('a[href^="/toggle-todo"]').textContent = json.todo.done ? 'hotovo' : 'nehotovo'
+    } else if (json.type === 'deleted' && json.todoId === todoId) {
+      document.querySelector('h1').textContent = 'Todočko bylo smazáno'
+    }
+  })
   </script>
 </body>
 </html>

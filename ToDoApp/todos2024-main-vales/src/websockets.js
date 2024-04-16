@@ -5,6 +5,7 @@ import db, { getAllTodos } from '../src/db.js'
 /** @type {Set<WebSocket>} */
 const connections = new Set()
 
+
 export const createWebSocketServer = (server) => {
     const wss = new WebSocketServer({ server })
   
@@ -43,7 +44,12 @@ export const createWebSocketServer = (server) => {
   export const sendTodoDetailToAllConnections = async (todo) => {
     const message = {
       type: 'todo',
-      todo,
+      todo: {
+        id: todo.id,
+        title: todo.title,
+        priority: todo.priority,
+        done: todo.done,
+      },
     }
   
     const json = JSON.stringify(message)
