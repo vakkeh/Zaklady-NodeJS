@@ -4,7 +4,7 @@ import knex from 'knex'
 // musíme upravit cestu importu. 
 import knexfile from '../knexfile.js'
 
-const db = knex(knexfile)
+const db = knex(knexfile[process.env.NODE_ENV || 'development'])
 
 // Jeden ze způsobů jak exportovat věci ze souboru je 'export default'
 // Defaultní exporty se importují takto:
