@@ -25,71 +25,81 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/todo/:id', async (req, res, next) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  if (!todo) return next()
+  if (!todo) {
+    return res.status(404).send('Todo not found');
+  }
 
   res.render('todo', {
     todo,
-  })
+  });
 
-  sendTodoDetailToAllConnections(todo)
-})
+  sendTodoDetailToAllConnections(todo);
+});
 
 app.post('/add-todo', async (req, res) => {
+  const { title, priority } = req.body;
+
+  if (!title || !priority) {
+    return res.status(400).send('Title and priority are required');
+  }
+
   const todo = {
-    title: req.body.title,
+    title: title.slice(0, 255), // Omezit délku názvu na 255 znaků
     done: false,
-    priority: req.body.priority || 'normal', // Přidáváme priority s výchozí hodnotou 'normal'
+    priority: priority || 'normal',
   };
 
   await db('todos').insert(todo);
 
-  sendTodosToAllConnections()
+  sendTodosToAllConnections();
 
-  res.redirect('/');
-}); 
+  res.status(201).redirect('/');
+});
 
 app.post('/update-todo/:id', async (req, res, next) => {
-  const { title, priority } = req.body; // Získáváme priority z těla požadavku
+  const { title, priority } = req.body;
   const todo = await db('todos').select('*').where('id', req.params.id).first();
 
   if (!todo) return next();
 
-  await db('todos').update({ title, priority }).where('id', todo.id); // Aktualizujeme i priority
+  await db('todos').update({ title, priority }).where('id', todo.id);
 
-  sendTodoDetailToAllConnections(todo)
-  sendTodosToAllConnections()
+  sendTodoDetailToAllConnections(todo);
+  sendTodosToAllConnections();
 
   res.redirect('back');
 });
 
-app.get('/remove-todo/:id', async (req, res) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+app.get('/remove-todo/:id', async (req, res, next) => {
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  if (!todo) return next()
+  if (!todo) {
+    return res.status(404).send('Todo not found');
+  }
 
-  await db('todos').delete().where('id', todo.id)
+  await db('todos').delete().where('id', todo.id);
 
-  sendTodoDetailToAllConnections(todo)
-  sendTodosToAllConnections()
-  sendTodoDeletedToAllConnections(req.params.id)
+  sendTodoDetailToAllConnections(todo);
+  sendTodosToAllConnections();
+  sendTodoDeletedToAllConnections(req.params.id);
 
-  res.redirect('/')
-})
+  res.redirect('/');
+});
 
 app.get('/toggle-todo/:id', async (req, res, next) => {
-  const todo = await db('todos').select('*').where('id', req.params.id).first()
+  const todo = await db('todos').select('*').where('id', req.params.id).first();
 
-  if (!todo) return next()
+  if (!todo) return next();
 
-  await db('todos').update({ done: !todo.done }).where('id', todo.id)
+  await db('todos').update({ done: !todo.done }).where('id', todo.id);
 
-  sendTodoDetailToAllConnections(todo)
-  sendTodosToAllConnections()
+  sendTodoDetailToAllConnections(todo);
+  sendTodosToAllConnections();
 
-  res.redirect('back')
-})
+  res.redirect('back');
+});
 
 app.use((req, res) => {
   res.status(404)
