@@ -1,7 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 // Defaultní a jmenné exporty je možné kombinovat 
-import db, { getAllTodos, createUser, getUser, getUserByToken } from '../src/db.js'
+import db, { getAllTodos, createUser, getUser, getUserByToken, getAllTodosByUserId, createTodo } from '../src/db.js'
 import { createWebSocketServer, sendTodosToAllConnections, sendTodoDetailToAllConnections, sendTodoDeletedToAllConnections } from '../src/websockets.js'
 
 export const app = express()
@@ -25,17 +25,22 @@ app.use(async (req, res, next) => {
 })
 
 app.get('/', async (req, res) => {
-  const todos = await db().select('*').from('todos')
+  if (!res.locals.user) {
+    return res.redirect('/login');
+  }
+
+  const todos = await getAllTodosByUserId(res.locals.user.id);
 
   res.render('index', {
     title: 'Todos',
     todos,
-  })
-})
+  });
+});
 
 app.get('/register', (req, res) => {
-  res.render('register');
+  res.render('register', { error: null });
 });
+
 
 app.post('/register', async (req, res) => {
   const { name, password } = req.body;
@@ -86,18 +91,7 @@ app.post('/add-todo', async (req, res) => {
   }
 
   const { title, priority } = req.body;
-
-  if (!title || !priority) {
-    return res.status(400).send('Title and priority are required');
-  }
-
-  const todo = {
-    title: title.slice(0, 255), // Omezit délku názvu na 255 znaků
-    done: false,
-    priority: priority || 'normal',
-  };
-
-  await db('todos').insert(todo);
+  await createTodo(title, priority, res.locals.user.id);
 
   sendTodosToAllConnections();
 

@@ -49,3 +49,20 @@ export const getUserByToken = async (token) => {
 
   return user
 }
+
+export const createTodo = async (title, priority, user_id) => {
+  const todo = {
+    title: title.slice(0, 255),
+    done: false,
+    priority: priority || 'normal',
+    user_id,
+  };
+
+  await db('todos').insert(todo);
+};
+
+export const getAllTodosByUserId = async (user_id) => {
+  const todos = await db('todos').select('*').where('user_id', user_id);
+
+  return todos;
+};
