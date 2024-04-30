@@ -1,6 +1,7 @@
 import express from 'express'
+import cookieParser from 'cookie-parser'
 // Defaultní a jmenné exporty je možné kombinovat 
-import db, { getAllTodos } from '../src/db.js'
+import db, { getAllTodos, createUser, getUser, getUserByToken } from '../src/db.js'
 import { createWebSocketServer, sendTodosToAllConnections, sendTodoDetailToAllConnections, sendTodoDeletedToAllConnections } from '../src/websockets.js'
 
 export const app = express()
@@ -9,9 +10,17 @@ app.set('view engine', 'ejs')
 
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 
-app.use((req, res, next) => {
-  console.log('Incomming request', req.method, req.url)
+app.use(async (req, res, next) => {
+  const token = req.cookies.token
+
+  if (token) {
+    res.locals.user = await getUserByToken(token)
+  } else {
+    res.locals.user = null
+  }
+
   next()
 })
 
@@ -23,6 +32,39 @@ app.get('/', async (req, res) => {
     todos,
   })
 })
+
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', async (req, res) => {
+  const { name, password } = req.body;
+  const user = await createUser(name, password);
+
+  res.cookie('token', user.token);
+  res.redirect('/');
+});
+
+app.get('/login', (req, res) => {
+  res.render('login', { error: null });
+});
+
+app.post('/login', async (req, res) => {
+  const { name, password } = req.body;
+  const user = await getUser(name, password);
+
+  if (!user) {
+    return res.render('login', { error: 'Invalid username or password' });
+  }
+
+  res.cookie('token', user.token);
+  res.redirect('/');
+});
+
+app.get('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.redirect('/');
+});
 
 app.get('/todo/:id', async (req, res, next) => {
   const todo = await db('todos').select('*').where('id', req.params.id).first();
@@ -39,6 +81,10 @@ app.get('/todo/:id', async (req, res, next) => {
 });
 
 app.post('/add-todo', async (req, res) => {
+  if (!res.locals.user) {
+    return res.status(401).send('Nepovolený přístup');
+  }
+
   const { title, priority } = req.body;
 
   if (!title || !priority) {
@@ -59,6 +105,10 @@ app.post('/add-todo', async (req, res) => {
 });
 
 app.post('/update-todo/:id', async (req, res, next) => {
+  if (!res.locals.user) {
+    return res.status(401).send('Nepovolený přístup');
+  }
+
   const { title, priority } = req.body;
   const todo = await db('todos').select('*').where('id', req.params.id).first();
 

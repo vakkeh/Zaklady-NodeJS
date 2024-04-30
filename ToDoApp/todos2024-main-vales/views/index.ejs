@@ -7,6 +7,14 @@
 </head>
 <body>
 
+  <% if (user) { %>
+    <%= user.name %> | <a href="/logout">Odhlásit</a>
+  <% } else { %>
+    <a href="/register">Registrovat</a> | <a href="/login">Přihlásit</a>
+  <% } %>
+
+  <hr />
+
   <h1><%= title %></h1>
 
   <div id="todos">
