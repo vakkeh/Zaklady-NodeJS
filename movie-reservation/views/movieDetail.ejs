@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Detail filmu</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1><%= movie.title %></h1>
+  <img src="<%= movie.coverImage %>" alt="<%= movie.title %> cover" style="width: 200px; height: auto;">
+  <p><%= movie.description %></p>
+  <h2>Promítací časy</h2>
+  <ul>
+    <% movie.showtimes.forEach(function(showtime, index) { %>
+      <li style="display: flex; justify-content: space-between;">
+        <p style="display: flex; align-items: center; margin: 0;">
+          <%= new Date(showtime.date).toLocaleDateString() %> - <%= showtime.time %> (<%= showtime.cinemaId.name %>)
+        </p>
+        <form action="/movies/<%= movie._id %>/showtimes/<%= index %>?_method=DELETE" method="POST" style="display:inline; padding: 0; margin: 0; border: none;">
+          <button type="submit">Odebrat</button>
+        </form>
+      </li>
+    <% }); %>
+  </ul>
+  <h2>Přidat nový promítací čas</h2>
+  <form action="/movies/<%= movie._id %>/showtimes" method="POST">
+    <label for="cinemaId">Kino:</label>
+    <select id="cinemaId" name="cinemaId" required>
+      <% cinemas.forEach(function(cinema) { %>
+        <option value="<%= cinema._id %>"><%= cinema.name %></option>
+      <% }); %>
+    </select><br>
+    <label for="date">Datum:</label>
+    <input type="date" id="date" name="date" required><br>
+    <label for="time">Čas:</label>
+    <input type="time" id="time" name="time" required><br>
+    <button type="submit">Přidat čas</button>
+  </form>
+  <form action="/movies/<%= movie._id %>?_method=DELETE" method="POST">
+    <button type="submit">Smazat film</button>
+  </form>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Detail rezervace</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>Detail rezervace</h1>
+  <p>Uživatel: <%= reservation.firstName %> <%= reservation.lastName %></p>
+  <p>Film: <%= reservation.movieId.title %></p>
+  <p>Datum: <%= reservation.date.toDateString() %></p>
+  <p>Čas: <%= reservation.time %></p>
+  <img src="<%= reservation.qrCode %>" alt="QR Code">
+  <a href="/tickets/<%= reservation._id %>.pdf" download>Stáhnout vstupenku (PDF)</a>
+</body>
+</html>

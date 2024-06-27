@@ -1,0 +1,1 @@
+console.log((async () => {await fn1(); fn2() })())

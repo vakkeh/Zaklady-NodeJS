@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kina</title>
+</head>
+<body>
+  <h1>Seznam kin</h1>
+  <ul>
+    <% cinemas.forEach(function(cinema) { %>
+      <li><%= cinema.name %> - <%= cinema.location %></li>
+    <% }); %>
+  </ul>
+  <h2>Přidat nové kino</h2>
+  <form action="/cinemas" method="POST">
+    <label for="name">Název:</label>
+    <input type="text" id="name" name="name" required><br>
+    <label for="location">Lokace:</label>
+    <input type="text" id="location" name="location" required><br>
+    <button type="submit">Přidat kino</button>
+  </form>
+</body>
+</html>

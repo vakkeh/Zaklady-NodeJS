@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Filmy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .movie-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .movie-item img {
+      width: 50px;
+      height: auto;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Seznam filmů</h1>
+  <ul>
+    <% movies.forEach(function(movie) { %>
+      <li class="movie-item">
+        <img src="<%= movie.coverImage %>" alt="<%= movie.title %> cover">
+        <a href="/movies/<%= movie._id %>"><%= movie.title %></a>
+      </li>
+    <% }); %>
+  </ul>
+  <h2>Přidat nový film</h2>
+  <form action="/movies" method="POST" enctype="multipart/form-data">
+    <label for="title">Název:</label>
+    <input type="text" id="title" name="title" required><br>
+    <label for="description">Popis:</label>
+    <textarea id="description" name="description"></textarea><br>
+    <label for="coverImage">Cover obrázek:</label>
+    <input type="file" id="coverImage" name="coverImage" accept="image/*" required><br>
+    <button type="submit">Přidat film</button>
+  </form>
+  <button onclick="window.location.href='<%= previousUrl %>'">Zpět</button>
+</body>
+</html>
