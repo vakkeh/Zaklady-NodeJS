@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
 const admins = require('./config/admins');
 const app = express();
-const historyTracker = require('./middleware/historyTracker');
 
 // Připojení k MongoDB databázi
 mongoose.connect('mongodb+srv://vakkeh:R1nLg4S3Y9iXW7xq@movie-reservation.jcrraei.mongodb.net/?retryWrites=true&w=majority&appName=movie-reservation', {
@@ -39,8 +38,6 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
-
-app.use(historyTracker);
 
 // Middleware pro kontrolu autentizace adminů
 function checkAdmin(req, res, next) {
